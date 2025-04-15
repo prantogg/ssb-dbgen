@@ -309,11 +309,11 @@ sd_cust(int child, long skip_count)
 }
 
 long
-sd_supp(int child, long skip_count)
+sd_driv(int child, long skip_count)
 {
-   ADVANCE_STREAM(S_NTRG_SD, skip_count);
-   ADVANCE_STREAM(S_PHNE_SD, 3L * skip_count);
-   ADVANCE_STREAM(S_ABAL_SD, skip_count);
+   ADVANCE_STREAM(D_NTRG_SD, skip_count);
+   ADVANCE_STREAM(D_PHNE_SD, 3L * skip_count);
+   ADVANCE_STREAM(D_ABAL_SD, skip_count);
    FAKE_V_STR(S_ADDR_LEN, S_ADDR_SD, skip_count);
    FAKE_V_STR(S_CMNT_LEN, S_CMNT_SD, skip_count);
    ADVANCE_STREAM(BBB_CMNT_SD, skip_count);

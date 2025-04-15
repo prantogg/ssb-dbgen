@@ -109,7 +109,7 @@ char *spawn_args[25];
 #ifdef SSBM
 int pr_cust (customer_t * c, int mode);
 int pr_part (part_t * p, int mode);
-int pr_supp (supplier_t * s, int mode);
+int pr_driver (driver_t * d, int mode);
 int pr_line (order_t * o, int mode);
 #else
 int pr_cust (customer_t * c, int mode);
@@ -117,7 +117,7 @@ int pr_line (order_t * o, int mode);
 int pr_order (order_t * o, int mode);
 int pr_part (part_t * p, int mode);
 int pr_psupp (part_t * p, int mode);
-int pr_supp (supplier_t * s, int mode);
+int pr_driver (driver_t * d, int mode);
 int pr_order_line (order_t * o, int mode);
 int pr_part_psupp (part_t * p, int mode);
 int pr_nation (code_t * c, int mode);
@@ -130,7 +130,7 @@ int pr_region (code_t * c, int mode);
 #ifdef SSBM
 int ld_cust (customer_t * c, int mode);
 int ld_part (part_t * p, int mode);
-int ld_supp (supplier_t * s, int mode);
+int ld_driv (driver_t * d, int mode);
 
 /*todo: get rid of ld_order*/
 int ld_line (order_t * o, int mode);
@@ -142,7 +142,7 @@ int ld_line (order_t * o, int mode);
 int ld_order (order_t * o, int mode);
 int ld_part (part_t * p, int mode);
 int ld_psupp (part_t * p, int mode);
-int ld_supp (supplier_t * s, int mode);
+int ld_driv (driver_t * d, int mode);
 int ld_order_line (order_t * o, int mode);
 int ld_part_psupp (part_t * p, int mode);
 int ld_nation (code_t * c, int mode);
@@ -155,7 +155,7 @@ int ld_region (code_t * c, int mode);
 #ifdef SSBM
 long sd_cust (int child, long skip_count);
 long sd_part (int child, long skip_count);
-long sd_supp (int child, long skip_count);
+long sd_driv (int child, long skip_count);
 
 long sd_line (int child, long skip_count);
 long sd_order (int child, long skip_count);
@@ -166,7 +166,7 @@ long sd_line (int child, long skip_count);
 long sd_order (int child, long skip_count);
 long sd_part (int child, long skip_count);
 long sd_psupp (int child, long skip_count);
-long sd_supp (int child, long skip_count);
+long sd_driv (int child, long skip_count);
 long sd_order_line (int child, long skip_count);
 long sd_part_psupp (int child, long skip_count);
 #endif
@@ -199,7 +199,7 @@ int hd_region (FILE * f);
 #ifdef SSBM
 int vrf_cust (customer_t * c, int mode);
 int vrf_part (part_t * p, int mode);
-int vrf_supp (supplier_t * s, int mode);
+int vrf_driv (driver_t * d, int mode);
 int vrf_line (order_t * o, int mode);
 int vrf_order (order_t * o, int mode);
 int vrf_date (date_t,int mode);
@@ -209,7 +209,7 @@ int vrf_line (order_t * o, int mode);
 int vrf_order (order_t * o, int mode);
 int vrf_part (part_t * p, int mode);
 int vrf_psupp (part_t * p, int mode);
-int vrf_supp (supplier_t * s, int mode);
+int vrf_driv (driver_t * d, int mode);
 int vrf_order_line (order_t * o, int mode);
 int vrf_part_psupp (part_t * p, int mode);
 int vrf_nation (code_t * c, int mode);
@@ -224,8 +224,8 @@ tdef tdefs[] =
     	{"part.tbl", "part table", 200000, hd_part,
 		{pr_part, ld_part}, sd_part, vrf_part, PSUPP, 0},
 	{0,0,0,0,{0,0}, 0,0,0,0},
-	{"supplier.tbl", "suppliers table", 2000, hd_supp,
-	        {pr_supp, ld_supp}, sd_supp, vrf_supp, NONE, 0},
+	{"drivers.tbl", "drivers table", 2000, hd_supp,
+	        {pr_driv, ld_driv}, sd_driv, vrf_driv, NONE, 0},
     
 	{"customer.tbl", "customers table", 30000, hd_cust,
 		{pr_cust, ld_cust}, sd_cust, vrf_cust, NONE, 0},
@@ -248,8 +248,8 @@ tdef tdefs[] =
 		{pr_part, ld_part}, sd_part, vrf_part, PSUPP, 0},
 	{"partsupp.tbl", "partsupplier table", 200000, hd_psupp,
 		{pr_psupp, ld_psupp}, sd_psupp, vrf_psupp, NONE, 0},
-	{"supplier.tbl", "suppliers table", 10000, hd_supp,
-		{pr_supp, ld_supp}, sd_supp, vrf_supp, NONE, 0},
+	{"drivers.tbl", "drivers table", 10000, hd_supp,
+		{pr_driv, ld_driv}, sd_driv, vrf_driv, NONE, 0},
 	{"customer.tbl", "customers table", 150000, hd_cust,
 		{pr_cust, ld_cust}, sd_cust, vrf_cust, NONE, 0},
 	{"orders.tbl", "order table", 150000, hd_order,
@@ -376,7 +376,7 @@ void
 gen_tbl (int tnum, long start, long count, long upd_num)
 {
 	static order_t o;
-	supplier_t supp;
+	driver_t driv;
 	customer_t cust;
 	part_t part;
 #ifdef SSBM
@@ -449,13 +449,13 @@ gen_tbl (int tnum, long start, long count, long upd_num)
 				else
 					tdefs[tnum].loader[direct] (&o, upd_num);
 			break;
-		case SUPP:
-			mk_supp (i, &supp);
+		case DRIV:
+			mk_driver (i, &driv);
 			if (set_seeds == 0)
 				if (validate)
-					tdefs[tnum].verify(&supp, 0);
+					tdefs[tnum].verify(&driv, 0);
 				else
-					tdefs[tnum].loader[direct] (&supp, upd_num);
+					tdefs[tnum].loader[direct] (&driv, upd_num);
 			break;
 		case CUST:
 			mk_cust (i, &cust);
@@ -735,7 +735,7 @@ process_options (int count, char **vector)
 			  table = 1 << PART;
 			  break;
 		  case 's':			/* generate partsupp ONLY */
-			  table = 1 << SUPP;
+			  table = 1 << DRIV;
 			  break;
 		  case 'd':			/* generate date ONLY */
 			  table = 1 << DATE;
@@ -746,7 +746,7 @@ process_options (int count, char **vector)
 		  case 'a':
 		          table = 1 << CUST;
 			  table |= 1 << PART;
-			  table |= 1 << SUPP;
+			  table |= 1 << DRIV;
 			  table |= 1 << DATE;
 			  table |= 1 << LINE;
 			  break;
@@ -782,8 +782,8 @@ process_options (int count, char **vector)
 		  case 'S':			/* generate partsupp ONLY */
 			  table = 1 << PSUPP;
 			  break;
-		  case 's':			/* generate suppliers ONLY */
-			  table = 1 << SUPP;
+		  case 'd':			/* generate drivers ONLY */
+			  table = 1 << DRIV;
 			  break;			  
 #endif
 		  default:
@@ -916,7 +916,7 @@ main (int ac, char **av)
 	int i;
 	
 	table = (1 << CUST) |
-		(1 << SUPP) |
+		(1 << DRIV) |
 		(1 << NATION) |
 		(1 << REGION) |
 		(1 << PART_PSUPP) |

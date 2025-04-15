@@ -61,11 +61,11 @@ seed_t     Seed[MAX_STREAM + 1] =
     {CUST,   298370230,  0, 1},      /* C_ABAL_SD    29 */
     {CUST,   1140279430, 0, 1},      /* C_MSEG_SD    30 */
     {CUST,   1335826707, 0, RNG_PER_SENT * 12},     /* C_CMNT_SD    31 */
-    {SUPP,   706178559,  0, 9},      /* S_ADDR_SD    32 */
-    {SUPP,   110356601,  0, 1},      /* S_NTRG_SD    33 */
-    {SUPP,   884434366,  0, 3},      /* S_PHNE_SD    34 */
-    {SUPP,   962338209,  0, 1},      /* S_ABAL_SD    35 */
-    {SUPP,   1341315363, 0, RNG_PER_SENT * 11},     /* S_CMNT_SD    36 */
+    {DRIV,   706178559,  0, 9},      /* S_ADDR_SD    32 */
+    {DRIV,   110356601,  0, 1},      /* S_NTRG_SD    33 */
+    {DRIV,   884434366,  0, 3},      /* S_PHNE_SD    34 */
+    {DRIV,   962338209,  0, 1},      /* S_ABAL_SD    35 */
+    {DRIV,   1341315363, 0, RNG_PER_SENT * 11},     /* S_CMNT_SD    36 */
     {PART,   709314158,  0, 92},      /* P_NAME_SD    37 */
     {ORDER,  591449447,  0, 1},      /* O_PRIO_SD    38 */
     {LINE,   431918286,  0, 1},      /* HVAR_SD      39 */
@@ -73,8 +73,8 @@ seed_t     Seed[MAX_STREAM + 1] =
     {NATION, 606179079,  0, RNG_PER_SENT * 16},      /* N_CMNT_SD    41 */
     {REGION, 1500869201, 0, RNG_PER_SENT * 16},      /* R_CMNT_SD    42 */
     {ORDER,  1434868289, 0, 1},      /* O_LCNT_SD    43 */
-    {SUPP,   263032577,  0, 1},      /* BBB offset   44 */
-    {SUPP,   753643799,  0, 1},      /* BBB type     45 */
-    {SUPP,   202794285,  0, 1},      /* BBB comment  46 */
-    {SUPP,   715851524,  0, 1}       /* BBB junk     47 */
+    {DRIV,   263032577,  0, 1},      /* BBB offset   44 */
+    {DRIV,   753643799,  0, 1},      /* BBB type     45 */
+    {DRIV,   202794285,  0, 1},      /* BBB comment  46 */
+    {DRIV,   715851524,  0, 1}       /* BBB junk     47 */
 };

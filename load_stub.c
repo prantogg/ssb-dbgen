@@ -101,7 +101,7 @@ hd_supp (FILE *f)
 }
 
 int 
-ld_supp (supplier_t *sp, int mode)
+ld_driv (driver_t *d, int mode)
 {
     static int count = 0;
 
@@ -138,7 +138,7 @@ ld_order (order_t *p, int mode)
     return(0);
 }
 
-ld_line (order_t *p, int mode)
+int ld_line (order_t *p, int mode)
 {
     static int count = 0;
 

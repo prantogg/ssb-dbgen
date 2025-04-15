@@ -63,7 +63,7 @@
 #define  P_CMNT_MAX    23
 #define  P_CAT_SEED    25
 
-#define  S_NAME_LEN    25
+#define  D_NAME_LEN    25
 
 #ifdef SSBM
 #define  S_ADDR_LEN    15

@@ -34,7 +34,7 @@ extern adhoc_t adhocs[];
 #define JDAY(date) ((date) - STARTDATE + JDAY_BASE + 1)
 #define PART_SUPP_BRIDGE(tgt, p, s) \
     { \
-    long tot_scnt = tdefs[SUPP].base * scale; \
+    long tot_scnt = tdefs[DRIV].base * scale; \
     tgt = (p + s *  (tot_scnt / SUPP_PER_PART +  \
 	(long) ((p - 1) / tot_scnt))) % tot_scnt + 1; \
     }
@@ -248,7 +248,7 @@ mk_order(long index, order_t *o, long upd_num)
 		o->lineorders[lcnt].linenumber = lcnt + 1;
 		o->lineorders[lcnt].custkey = o->custkey;
 		RANDOM(o->lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
-		RANDOM(o->lineorders[lcnt].suppkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+		RANDOM(o->lineorders[lcnt].drivkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
 				
 		RANDOM(o->lineorders[lcnt].quantity, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
 		RANDOM(o->lineorders[lcnt].discount, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
@@ -348,7 +348,7 @@ mk_order(long index, order_t *o, long upd_num)
         RANDOM(o->l[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
         RPRICE_BRIDGE( rprice, o->l[lcnt].partkey);
         RANDOM(supp_num, 0, 3, L_SKEY_SD);
-        PART_SUPP_BRIDGE( o->l[lcnt].suppkey, o->l[lcnt].partkey, supp_num);
+        PART_SUPP_BRIDGE( o->l[lcnt].drivkey, o->l[lcnt].partkey, supp_num);
         o->l[lcnt].eprice = rprice * o->l[lcnt].quantity;
 		
         o->totalprice +=
@@ -454,7 +454,7 @@ mk_part(long index, part_t *p)
 	for (snum = 0; snum < SUPP_PER_PART; snum++)
 		{
 		p->s[snum].partkey = p->partkey;
-		PART_SUPP_BRIDGE( p->s[snum].suppkey, index, snum);
+		PART_SUPP_BRIDGE( p->s[snum].drivkey, index, snum);
 		RANDOM(p->s[snum].qty, PS_QTY_MIN, PS_QTY_MAX, PS_QTY_SD);
 		RANDOM(p->s[snum].scost, PS_SCST_MIN, PS_SCST_MAX, PS_SCST_SD);
 		p->s[snum].clen = TEXT(PS_CMNT_LEN, PS_CMNT_SD, p->s[snum].comment);
@@ -466,26 +466,26 @@ mk_part(long index, part_t *p)
 
 #ifdef SSBM
 long
-mk_supp(long index, supplier_t *s)
+mk_driver(long index, driver_t *d)
 {
 	long     i,
 		bad_press,
 		noise,
 		offset,
 		type;
-        s->suppkey = index;
-	sprintf(s->name, S_NAME_FMT, S_NAME_TAG, index); 
-	s->alen = V_STR(S_ADDR_LEN, S_ADDR_SD, s->address);
-	RANDOM(i, 0, nations.count-1, S_NTRG_SD);
-	strcpy(s->nation_name,nations.list[i].text);
-        strcpy(s->region_name,regions.list[nations.list[i].weight].text);
-	gen_city(s->city,s->nation_name);
-	gen_phone(i, s->phone, (long)C_PHNE_SD);
+        d->drivkey = index;
+	sprintf(d->name, D_NAME_FMT, D_NAME_TAG, index); 
+	d->alen = V_STR(S_ADDR_LEN, S_ADDR_SD, d->address);
+	RANDOM(i, 0, nations.count-1, D_NTRG_SD);
+	strcpy(d->nation_name,nations.list[i].text);
+        strcpy(d->region_name,regions.list[nations.list[i].weight].text);
+	gen_city(d->city,d->nation_name);
+	gen_phone(i, d->phone, (long)C_PHNE_SD);
 	return (0);
 }
 #else
 long
-mk_supp(long index, supplier_t *s)
+mk_driver(long index, driver_t *d)
 	{
 	long     i,
 		bad_press,
@@ -493,32 +493,32 @@ mk_supp(long index, supplier_t *s)
 		offset,
 		type;
 	
-	s->suppkey = index;
-	sprintf(s->name, S_NAME_FMT, S_NAME_TAG, index); 
-	s->alen = V_STR(S_ADDR_LEN, S_ADDR_SD, s->address);
-	RANDOM(i, 0, nations.count - 1, S_NTRG_SD);
-	s->nation_code= i;
-	gen_phone(i, s->phone, S_PHNE_SD);
-	RANDOM(s->acctbal, S_ABAL_MIN, S_ABAL_MAX, S_ABAL_SD);
+	d->drivkey = index;
+	sprintf(d->name, D_NAME_FMT, D_NAME_TAG, index); 
+	d->alen = V_STR(S_ADDR_LEN, S_ADDR_SD, d->address);
+	RANDOM(i, 0, nations.count - 1, D_NTRG_SD);
+	d->nation_code= i;
+	gen_phone(i, d->phone, D_PHNE_SD);
+	RANDOM(d->acctbal, D_ABAL_MIN, D_ABAL_MAX, D_ABAL_SD);
 	
-	s->clen = TEXT(S_CMNT_LEN, S_CMNT_SD, s->comment);
+	d->clen = TEXT(S_CMNT_LEN, S_CMNT_SD, d->comment);
 	/* these calls should really move inside the if stmt below, 
 	* but this will simplify seedless parallel load 
 	*/
 	RANDOM(bad_press, 1, 10000, BBB_CMNT_SD);
 	RANDOM(type, 0, 100, BBB_TYPE_SD);
-	RANDOM(noise, 0, (s->clen - BBB_CMNT_LEN), BBB_JNK_SD);
-	RANDOM(offset, 0, (s->clen - (BBB_CMNT_LEN + noise)),
+	RANDOM(noise, 0, (d->clen - BBB_CMNT_LEN), BBB_JNK_SD);
+	RANDOM(offset, 0, (d->clen - (BBB_CMNT_LEN + noise)),
 		BBB_OFFSET_SD);
-	if (bad_press <= S_CMNT_BBB)
+	if (bad_press <= D_CMNT_BBB)
 		{
 		type = (type < BBB_DEADBEATS) ?0:1;
-        memcpy(s->comment + offset, BBB_BASE, BBB_BASE_LEN);
+        memcpy(d->comment + offset, BBB_BASE, BBB_BASE_LEN);
         if (type == 0)
-  			memcpy(s->comment + BBB_BASE_LEN + offset + noise, 
+  			memcpy(d->comment + BBB_BASE_LEN + offset + noise, 
 			BBB_COMPLAIN, BBB_TYPE_LEN); 
         else
-			memcpy(s->comment + BBB_BASE_LEN + offset + noise, 
+			memcpy(d->comment + BBB_BASE_LEN + offset + noise, 
 			BBB_COMMEND, BBB_TYPE_LEN); 
 		}
 	
@@ -617,8 +617,8 @@ int gen_city(char *cityName, char *nationName){
 
 
 /*
-P_NAME is as long as 55 bytes in TPC-H, which is un¬reasonably large. 
-We reduce it to 22 by limiting to a concatena¬tion of two colors (see [TPC-H], pg 94). 
+P_NAME is as long as 55 bytes in TPC-H, which is unï¿½reasonably large. 
+We reduce it to 22 by limiting to a concatenaï¿½tion of two colors (see [TPC-H], pg 94). 
 We also add a new column named P_COLOR that could be used in queries where currently a 
 color must be chosen by substring from P_NAME.
 */

@@ -18,13 +18,13 @@ CREATE TABLE TPCD.PART  ( P_PARTKEY     INTEGER NOT NULL,
                           P_RETAILPRICE DECIMAL(15,2) NOT NULL,
                           P_COMMENT     VARCHAR(23) NOT NULL );
 
-CREATE TABLE TPCD.SUPPLIER ( S_SUPPKEY     INTEGER NOT NULL,
-                             S_NAME        CHAR(25) NOT NULL,
-                             S_ADDRESS     VARCHAR(40) NOT NULL,
-                             S_NATIONKEY   INTEGER NOT NULL,
-                             S_PHONE       CHAR(15) NOT NULL,
-                             S_ACCTBAL     DECIMAL(15,2) NOT NULL,
-                             S_COMMENT     VARCHAR(101) NOT NULL);
+CREATE TABLE TPCD.DRIVER (  D_DRIVKEY     INTEGER NOT NULL,
+                             D_NAME        CHAR(25) NOT NULL,
+                             D_ADDRESS     VARCHAR(40) NOT NULL,
+                             D_NATIONKEY   INTEGER NOT NULL,
+                             D_PHONE       CHAR(15) NOT NULL,
+                             D_ACCTBAL     DECIMAL(15,2) NOT NULL,
+                             D_COMMENT     VARCHAR(101) NOT NULL);
 
 CREATE TABLE TPCD.PARTSUPP ( PS_PARTKEY     INTEGER NOT NULL,
                              PS_SUPPKEY     INTEGER NOT NULL,

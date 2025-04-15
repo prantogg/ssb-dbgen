@@ -21,7 +21,7 @@
 
 /*SSBM use the lineorder without partsupp and order table*/
 #define  L_SKEY_MIN   1
-#define  L_SKEY_MAX (tdefs[SUPP].base * scale)
+#define  L_SKEY_MAX (tdefs[DRIV].base * scale)
 
 #endif
 
@@ -57,7 +57,7 @@
 #define  NONE		-1
 #define  PART		0
 #define  PSUPP		1
-#define  SUPP		2
+#define  DRIV		2
 #define  CUST		3
 #define  ORDER		4
 #define  LINE		5
@@ -329,13 +329,13 @@ extern tdef tdefs[];
 /*
  * defines which control the suppliers table
  */
-#define  S_SIZE     145
-#define  S_NAME_TAG "Supplier#"
-#define  S_NAME_FMT "%s%09ld"
-#define  S_ABAL_MIN   -99999
-#define  S_ABAL_MAX    999999
-#define  S_CMNT_MAX    101      
-#define  S_CMNT_BBB    10       /* number of BBB comments/SF */
+#define  D_SIZE     145
+#define  D_NAME_TAG "Driver#"
+#define  D_NAME_FMT "%s%09ld"
+#define  D_ABAL_MIN   -99999
+#define  D_ABAL_MAX    999999
+#define  D_CMNT_MAX    101      
+#define  D_CMNT_BBB    10       /* number of BBB comments/SF */
 #define  BBB_DEADBEATS 50       /* % that are complaints */
 #define  BBB_BASE  "Customer "
 #define  BBB_COMPLAIN  "Complaints"
@@ -349,7 +349,7 @@ extern tdef tdefs[];
  */
 #define  PS_SIZE      145
 #define  PS_SKEY_MIN  0
-#define  PS_SKEY_MAX  ((tdefs[SUPP].base - 1) * scale)
+#define  PS_SKEY_MAX  ((tdefs[DRIV].base - 1) * scale)
 #define  PS_SCST_MIN  100
 #define  PS_SCST_MAX  100000
 #define  PS_QTY_MIN   1
@@ -575,9 +575,9 @@ sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
 #define  C_PHNE_SD 28
 #define  C_ABAL_SD 29
 #define  C_MSEG_SD 30
-#define  S_NTRG_SD 33
-#define  S_PHNE_SD 34
-#define  S_ABAL_SD 35
+#define  D_NTRG_SD 33
+#define  D_PHNE_SD 34
+#define  D_ABAL_SD 35
 #define  P_NAME_SD 37
 #define  O_PRIO_SD 38
 #define  HVAR_SD   39

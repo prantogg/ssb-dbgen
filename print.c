@@ -265,7 +265,7 @@ pr_line(order_t *o, int mode)
         PR_INT(fp_l, o->lineorders[i].linenumber);
 	PR_INT(fp_l, o->lineorders[i].custkey);
 	PR_INT(fp_l, o->lineorders[i].partkey);
-        PR_INT(fp_l, o->lineorders[i].suppkey);
+        PR_INT(fp_l, o->lineorders[i].drivkey);
         PR_STR(fp_l, o->lineorders[i].orderdate, DATE_LEN);
 	PR_STR(fp_l, o->lineorders[i].opriority, O_OPRIO_LEN);
 	PR_INT(fp_l, o->lineorders[i].ship_priority);
@@ -306,7 +306,7 @@ pr_line(order_t *o, int mode)
         PR_STRT(fp_l);
         PR_HUGE(fp_l, o->l[i].okey);
         PR_INT(fp_l, o->l[i].partkey);
-        PR_INT(fp_l, o->l[i].suppkey);
+        PR_INT(fp_l, o->l[i].drivkey);
         PR_INT(fp_l, o->l[i].lcnt);
         PR_INT(fp_l, o->l[i].quantity);
         PR_MONEY(fp_l, o->l[i].eprice);
@@ -422,7 +422,7 @@ pr_psupp(part_t *part, int mode)
       {
       PR_STRT(ps_fp);
       PR_INT(ps_fp, part->s[i].partkey);
-      PR_INT(ps_fp, part->s[i].suppkey);
+      PR_INT(ps_fp, part->s[i].drivkey);
       PR_INT(ps_fp, part->s[i].qty);
       PR_MONEY(ps_fp, part->s[i].scost);
       PR_VSTR_LAST(ps_fp, part->s[i].comment, 
@@ -454,46 +454,46 @@ pr_part_psupp(part_t *part, int mode)
 
 #ifdef SSBM
 int
-pr_supp(supplier_t *supp, int mode)
+pr_driv(driver_t *driv, int mode)
 {
     static FILE *fp = NULL;
 
     if (fp == NULL)
-        fp = print_prep(SUPP, mode);
+        fp = print_prep(DRIV, mode);
 
     PR_STRT(fp);
-    PR_INT(fp, supp->suppkey);
-    PR_STR(fp, supp->name, S_NAME_LEN);
+    PR_INT(fp, driv->drivkey);
+    PR_STR(fp, driv->name, D_NAME_LEN);
     
-    PR_VSTR(fp, supp->address,
-	    (columnar)?(long)(ceil(S_ADDR_LEN * V_STR_HGH)):supp->alen);
-    PR_STR(fp, supp->city, CITY_FIX);
-    PR_STR(fp, supp->nation_name, C_NATION_NAME_LEN);
-    PR_STR(fp, supp->region_name, C_REGION_NAME_LEN);
-    PR_STR(fp, supp->phone, PHONE_LEN);
+    PR_VSTR(fp, driv->address,
+	    (columnar)?(long)(ceil(S_ADDR_LEN * V_STR_HGH)):driv->alen);
+    PR_STR(fp, driv->city, CITY_FIX);
+    PR_STR(fp, driv->nation_name, C_NATION_NAME_LEN);
+    PR_STR(fp, driv->region_name, C_REGION_NAME_LEN);
+    PR_STR(fp, driv->phone, PHONE_LEN);
     PR_END(fp);
 
     return(0);
 }
 #else
 int
-pr_supp(supplier_t *supp, int mode)
+pr_driv(driver_t *driv, int mode)
 {
 static FILE *fp = NULL;
         
    if (fp == NULL)
-        fp = print_prep(SUPP, mode);
+        fp = print_prep(DRIV, mode);
 
    PR_STRT(fp);
-   PR_INT(fp, supp->suppkey);
-   PR_STR(fp, supp->name, S_NAME_LEN);
-   PR_VSTR(fp, supp->address, 
-       (columnar)?(long)(ceil(S_ADDR_LEN * V_STR_HGH)):supp->alen);
-   PR_INT(fp, supp->nation_code);
-   PR_STR(fp, supp->phone, PHONE_LEN);
-   PR_MONEY(fp, supp->acctbal);
-   PR_VSTR_LAST(fp, supp->comment, 
-       (columnar)?(long)(ceil(S_CMNT_LEN * V_STR_HGH)):supp->clen);
+   PR_INT(fp, driv->drivkey);
+   PR_STR(fp, driv->name, D_NAME_LEN);
+   PR_VSTR(fp, driv->address, 
+       (columnar)?(long)(ceil(S_ADDR_LEN * V_STR_HGH)):driv->alen);
+   PR_INT(fp, driv->nation_code);
+   PR_STR(fp, driv->phone, PHONE_LEN);
+   PR_MONEY(fp, driv->acctbal);
+   PR_VSTR_LAST(fp, driv->comment, 
+       (columnar)?(long)(ceil(S_CMNT_LEN * V_STR_HGH)):driv->clen);
    PR_END(fp);
 
    return(0);
@@ -763,7 +763,7 @@ vrf_line(order_t *o, int mode)
 	    VRF_INT(LINE, o->lineorders[i].linenumber);
 	    VRF_INT(LINE, o->lineorders[i].custkey);
 	    VRF_INT(LINE, o->lineorders[i].partkey);
-	    VRF_INT(LINE, o->lineorders[i].suppkey);
+	    VRF_INT(LINE, o->lineorders[i].drivkey);
 	    VRF_STR(LINE, o->lineorders[i].orderdate);
 	    VRF_STR(LINE, o->lineorders[i].opriority);
 	    VRF_INT(LINE, o->lineorders[i].ship_priority);
@@ -793,7 +793,7 @@ vrf_line(order_t *o, int mode)
         VRF_STRT(LINE);
         VRF_HUGE(LINE, o->l[i].okey);
         VRF_INT(LINE, o->l[i].partkey);
-        VRF_INT(LINE, o->l[i].suppkey);
+        VRF_INT(LINE, o->l[i].drivkey);
         VRF_INT(LINE, o->l[i].lcnt);
         VRF_INT(LINE, o->l[i].quantity);
         VRF_MONEY(LINE, o->l[i].eprice);
@@ -886,7 +886,7 @@ vrf_psupp(part_t *part, int mode)
       {
       VRF_STRT(PSUPP);
       VRF_INT(PSUPP, part->s[i].partkey);
-      VRF_INT(PSUPP, part->s[i].suppkey);
+      VRF_INT(PSUPP, part->s[i].drivkey);
       VRF_INT(PSUPP, part->s[i].qty);
       VRF_MONEY(PSUPP, part->s[i].scost);
       VRF_STR(PSUPP, part->s[i].comment);
@@ -914,36 +914,36 @@ vrf_part_psupp(part_t *part, int mode)
 
 #ifdef SSBM
 int
-vrf_supp(supplier_t *supp, int mode)
+vrf_driv(driver_t *driv, int mode)
 {
-    VRF_STRT(SUPP);
-    VRF_INT(SUPP, supp->suppkey);
-    VRF_STR(SUPP, supp->name);
+    VRF_STRT(DRIV);
+    VRF_INT(DRIV, driv->drivkey);
+    VRF_STR(DRIV, driv->name);
     
-    VRF_STR(CUST, supp->address);
-    VRF_INT(CUST, supp->nation_key);
-    VRF_STR(CUST, supp->nation_name);
-    VRF_INT(CUST, supp->region_key);
-    VRF_STR(CUST, supp->region_name);
-    VRF_STR(CUST, supp->phone);
-    VRF_END(SUPP);
+    VRF_STR(CUST, driv->address);
+    VRF_INT(CUST, driv->nation_key);
+    VRF_STR(CUST, driv->nation_name);
+    VRF_INT(CUST, driv->region_key);
+    VRF_STR(CUST, driv->region_name);
+    VRF_STR(CUST, driv->phone);
+    VRF_END(DRIV);
 
     return(0);
 }
 
 #else
 int
-vrf_supp(supplier_t *supp, int mode)
+vrf_driver(driver_t *driv, int mode)
 {
-   VRF_STRT(SUPP);
-   VRF_INT(SUPP, supp->suppkey);
-   VRF_STR(SUPP, supp->name);
-   VRF_STR(SUPP, supp->address);
-   VRF_INT(SUPP, supp->nation_code);
-   VRF_STR(SUPP, supp->phone);
-   VRF_MONEY(SUPP, supp->acctbal);
-   VRF_STR(SUPP, supp->comment); 
-   VRF_END(SUPP);
+   VRF_STRT(DRIV);
+   VRF_INT(DRIV, driv->drivkey);
+   VRF_STR(DRIV, driv->name);
+   VRF_STR(DRIV, driv->address);
+   VRF_INT(DRIV, driv->nation_code);
+   VRF_STR(DRIV, driv->phone);
+   VRF_MONEY(DRIV, driv->acctbal);
+   VRF_STR(DRIV, driv->comment); 
+   VRF_END(DRIV);
 
    return(0);
 }

@@ -54,7 +54,7 @@ typedef struct
     int             linenumber; /*integer, constrain to max of 7*/
     long            custkey;
     long            partkey;
-    long            suppkey;
+    long            drivkey;
     char            orderdate[DATE_LEN];
     char            opriority[MAXAGG_LEN + 1];
     long            ship_priority;
@@ -73,7 +73,7 @@ typedef struct
 {
     DSS_HUGE	    *okey; 
     long            partkey;
-    long            suppkey;
+    long            drivkey;
     long            lcnt;
     long            quantity;
     long            eprice;
@@ -137,7 +137,7 @@ void	hd_sparse	PROTO((long index, DSS_HUGE *ok, long seq));
 typedef struct
 {
     long            partkey;
-    long            suppkey;
+    long            drivkey;
     long            qty;
     long            scost;
     char           comment[PS_CMNT_MAX + 1];
@@ -188,8 +188,8 @@ int ld_part    PROTO((part_t * part, int mode));
 #ifdef SSBM
 typedef struct
 {
-    long            suppkey;
-    char            name[S_NAME_LEN + 1];
+    long            drivkey;
+    char            name[D_NAME_LEN + 1];
     char            address[S_ADDR_MAX + 1];
     int             alen; 
     char            city[CITY_FIX +1];
@@ -198,12 +198,12 @@ typedef struct
     int             region_key;
     char            region_name[S_REGION_NAME_LEN+1];
     char            phone[PHONE_LEN + 1];
-}               supplier_t;
+}               driver_t;
 #else
 typedef struct
 {
-    long            suppkey;
-    char            name[S_NAME_LEN + 1];
+    long            drivkey;
+    char            name[D_NAME_LEN + 1];
     char            address[S_ADDR_MAX + 1];
     int             alen;
     long            nation_code;
@@ -211,13 +211,13 @@ typedef struct
     long            acctbal;
     char            comment[S_CMNT_MAX + 1];
     int             clen;
-}               supplier_t;
+}               driver_t;
 #endif
 
-/* supplier.c */
-long mk_supp   PROTO((long index, supplier_t * s));
-int pr_supp    PROTO((supplier_t * supp, int mode));
-int ld_supp    PROTO((supplier_t * supp, int mode));
+/* driver.c */
+long mk_driver   PROTO((long index, driver_t * s));
+int pr_driv    PROTO((driver_t * driv, int mode));
+int ld_driv    PROTO((driver_t * driv, int mode));
 
 #ifdef SSBM
 /*todo: add new date table*/
