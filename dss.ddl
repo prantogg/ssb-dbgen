@@ -68,3 +68,18 @@ CREATE TABLE TPCD.LINEITEM ( L_ORDERKEY    INTEGER NOT NULL,
                              L_SHIPMODE     CHAR(10) NOT NULL,  -- R
                              L_COMMENT      VARCHAR(44) NOT NULL);
 
+CREATE TABLE TPCD.TRIP (
+                        T_TRIPKEY     BIGINT NOT NULL,
+                        T_CUSTKEY     INTEGER NOT NULL,
+                        T_DRIVERKEY   INTEGER NOT NULL,
+                        T_VEHICLEKEY  INTEGER NOT NULL,
+                        T_PICKUPDATE  DATE NOT NULL,
+                        T_DROPOFFDATE DATE NOT NULL,
+                        T_FARE        DECIMAL(15,2) NOT NULL,
+                        T_TIP         DECIMAL(15,2) NOT NULL,
+                        T_TOTALAMOUNT DECIMAL(15,2) NOT NULL,
+                        T_DISTANCE    DECIMAL(15,2) NOT NULL,
+                        T_PICKUP_LOC_X DOUBLE PRECISION NOT NULL,
+                        T_PICKUP_LOC_Y DOUBLE PRECISION NOT NULL,
+                        T_DROPOFF_LOC_X DOUBLE PRECISION NOT NULL,
+                        T_DROPOFF_LOC_Y DOUBLE PRECISION NOT NULL);

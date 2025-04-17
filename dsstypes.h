@@ -50,24 +50,19 @@ int ld_cust    PROTO((customer_t * c, int mode));
 
 typedef struct
 {
-    DSS_HUGE	    *okey;  /*for clustering line items*/
-    int             linenumber; /*integer, constrain to max of 7*/
+    DSS_HUGE	    *tkey;
     long            custkey;
-    long            partkey;
-    long            drivkey;
-    char            orderdate[DATE_LEN];
-    char            opriority[MAXAGG_LEN + 1];
-    long            ship_priority;
-    long             quantity;
-    long           extended_price;
-    long           order_totalprice;
-    long           discount;
-    long           revenue;
-    long           supp_cost;
-    long           tax;
-    char            commit_date[DATE_LEN] ;
-    char            shipmode[O_SHIP_MODE_LEN + 1];
-}  lineorder_t;
+    long            driverkey;
+    long            vehiclekey;
+    char            pickupdate[DATE_LEN];
+    char            dropoffdate[DATE_LEN];
+    long            fare;
+    long            tip;
+    long            totalamount;
+    double          distance;
+    double        pickup_loc[2];     // [longitude, latitude]
+    double        dropoff_loc[2];    // [longitude, latitude]
+}  trip_t;
 #else
 typedef struct
 {
@@ -102,7 +97,7 @@ typedef struct
     char            clerk[O_CLRK_LEN + 1];
     int             spriority;
     long            lines;
-    lineorder_t     lineorders[O_LCNT_MAX];
+    trip_t          trips[O_LCNT_MAX];
 }   order_t;
 #else
 typedef struct
@@ -123,9 +118,9 @@ typedef struct
 #endif
 
 /* order.c */
-long	mk_order	PROTO((long index, order_t * o, long upd_num));
-int		pr_order	PROTO((order_t * o, int mode));
-int		ld_order	PROTO((order_t * o, int mode));
+long	mk_trip	    PROTO((long index, trip_t * t, long upd_num));
+int		pr_trip	    PROTO((trip_t * t, int mode));
+int		ld_trip	    PROTO((trip_t * t, int mode));
 void	ez_sparse	PROTO((long index, DSS_HUGE *ok, long seq));
 #ifndef SUPPORT_64BITS
 void	hd_sparse	PROTO((long index, DSS_HUGE *ok, long seq));

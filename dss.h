@@ -60,6 +60,7 @@
 #define  DRIV		2
 #define  CUST		3
 #define  ORDER		4
+#define  TRIP		5
 #define  LINE		5
 #define  ORDER_LINE     6
 #define  PART_PSUPP     7
@@ -389,6 +390,7 @@ extern tdef tdefs[];
 #define  L_DCNT_MIN   0
 #define  L_DCNT_MAX   10
 #define  L_PKEY_MIN   1
+#define  SPATIAL_DIM  2
 
 #ifdef SSBM
 /*part table log based*/
@@ -498,16 +500,18 @@ extern tdef tdefs[];
 #define DT_VSTR		1
 #endif /* MVS */
 #define DT_INT		2
-#define DT_HUGE		3
+#define DT_HUGE	3
 #define DT_KEY		4
 #define DT_MONEY	5
 #define DT_CHR		6
+#define DT_DBL    7
 
 int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define PR_STR(f, str, len)		dbg_print(DT_STR, f, (void *)str, len, 1)
 #define PR_VSTR(f, str, len) 	dbg_print(DT_VSTR, f, (void *)str, len, 1)
 #define PR_VSTR_LAST(f, str, len) 	dbg_print(DT_VSTR, f, (void *)str, len, 0)
 #define PR_INT(f, str) 			dbg_print(DT_INT, f, (void *)str, 0, 1)
+#define PR_DBL(f, val)        dbg_print(DT_DBL, f, (void *)&val, 0, 1)
 #define PR_HUGE(f, str) 		dbg_print(DT_HUGE, f, (void *)str, 0, 1)
 #define PR_KEY(f, str) 			dbg_print(DT_KEY, f, (void *)str, 0, -1)
 #define PR_MONEY(f, str) 		dbg_print(DT_MONEY, f, (void *)str, 0, 1)
@@ -532,6 +536,7 @@ sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
  */
 #define  VRF_STR(t, d) {char *xx = d; while (*xx) tdefs[t].vtotal += *xx++;}
 #define  VRF_INT(t,d)  tdefs[t].vtotal += d
+#define  VRF_DBL(t,d)  tdefs[t].vtotal += (long)(d)
 #ifdef SUPPORT_64BITS
 #define  VRF_HUGE(t,d)	tdefs[t].vtotal = *((long *)&d) + *((long *)(&d + 1))
 #else

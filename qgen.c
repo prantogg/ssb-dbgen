@@ -385,7 +385,7 @@ setup(void)
 }
 
 
-main(int ac, char **av)
+int main(int ac, char **av)
 {
     int i;
     FILE *ifp;

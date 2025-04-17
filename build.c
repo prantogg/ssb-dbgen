@@ -18,6 +18,7 @@
 #endif
 
 #include <math.h>
+#include "spider.h"
 
 #include "dss.h"
 #include "dsstypes.h"
@@ -26,6 +27,10 @@
 #include "adhoc.h"
 extern adhoc_t adhocs[];
 #endif /* ADHOC */
+
+#define DIST_MEAN 0.07
+#define DIST_STDDEV 1.72
+#define GLOBAL_DISTANCE_SEED 12345
 
 #define LEAP_ADJ(yr, mnth)      \
 ((LEAP(yr) && (mnth) >= 2) ? 1 : 0)
@@ -204,87 +209,77 @@ hd_sparse(long i, DSS_HUGE *ok, long seq)
 
 #ifdef SSBM
 long
-mk_order(long index, order_t *o, long upd_num)
-	{
-	long      lcnt;
-	long      rprice;
-	long      ocnt;
-	long      tmp_date;
-	long      c_date;
-	long      clk_num;
-	long      supp_num;
-	static char **asc_date = NULL;
-	char tmp_str[2];
-	char **mk_ascdate PROTO((void));
+mk_trip(long index, trip_t *t, long upd_num)
+{
+    long tmp_date;
+    long dropoff_offset;
+    static char **asc_date = NULL;
+    char **mk_ascdate PROTO((void));
+	static FILE* spatial_fp = NULL;
 	int delta = 1;
 
-	if (asc_date == NULL)
-	    asc_date = mk_ascdate();
+    if (asc_date == NULL)
+        asc_date = mk_ascdate();
 
-	RANDOM(tmp_date, O_ODATE_MIN, O_ODATE_MAX, O_ODATE_SD);
-	strcpy(o->odate, asc_date[tmp_date - STARTDATE]);
-
-	mk_sparse (index, o->okey,
-		(upd_num == 0) ? 0 : 1 + upd_num / (10000 / refresh));
-	RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD);
-	while (o->custkey % CUST_MORTALITY == 0)
-	    {
-		o->custkey += delta;
-		o->custkey = MIN(o->custkey, O_CKEY_MAX);
-		delta *= -1;
-	    }
-	pick_str(&o_priority_set, O_PRIO_SD, o->opriority);
-	RANDOM(clk_num, 1, MAX((scale * O_CLRK_SCL), O_CLRK_SCL), O_CLRK_SD);
-	o->spriority = 0;
-	
-	o->totalprice = 0;
-	ocnt = 0;
-	
-	RANDOM(o->lines, O_LCNT_MIN, O_LCNT_MAX, O_LCNT_SD);
-	for (lcnt = 0; lcnt < o->lines; lcnt++)
-	    {
-		
-		HUGE_SET(o->okey, o->lineorders[lcnt].okey);
-		o->lineorders[lcnt].linenumber = lcnt + 1;
-		o->lineorders[lcnt].custkey = o->custkey;
-		RANDOM(o->lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
-		RANDOM(o->lineorders[lcnt].drivkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
-				
-		RANDOM(o->lineorders[lcnt].quantity, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
-		RANDOM(o->lineorders[lcnt].discount, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
-		RANDOM(o->lineorders[lcnt].tax, L_TAX_MIN, L_TAX_MAX, L_TAX_SD);
-
-		strcpy(o->lineorders[lcnt].orderdate,o->odate);
-
-		strcpy(o->lineorders[lcnt].opriority,o->opriority);
-		o->lineorders[lcnt].ship_priority = o->spriority;
-
-		RANDOM(c_date, L_CDTE_MIN, L_CDTE_MAX, L_CDTE_SD);
-		c_date += tmp_date;        
-		strcpy(o->lineorders[lcnt].commit_date, asc_date[c_date - STARTDATE]);
-
-		pick_str(&l_smode_set, L_SMODE_SD, o->lineorders[lcnt].shipmode);
-		
-		RPRICE_BRIDGE( rprice, o->lineorders[lcnt].partkey);
-		o->lineorders[lcnt].extended_price = rprice * o->lineorders[lcnt].quantity;
-		o->lineorders[lcnt].revenue = o->lineorders[lcnt].extended_price * ((long)100-o->lineorders[lcnt].discount)/(long)PENNIES;
-		
-		//round off problem with linux if use 0.6
-		o->lineorders[lcnt].supp_cost = 6 * rprice /10;
-		
-		o->totalprice +=
-		    ((o->lineorders[lcnt].extended_price * 
-		      ((long)100 - o->lineorders[lcnt].discount)) / (long)PENNIES ) *
-		    ((long)100 + o->lineorders[lcnt].tax)
-		    / (long)PENNIES;
-	    }
-	
-	for (lcnt = 0; lcnt < o->lines; lcnt++)
-	    {
-		o->lineorders[lcnt].order_totalprice = o->totalprice;
-	    }
-	return (0);
+	if (!spatial_fp) {
+		spatial_fp = fopen("pickup.csv", "r");
+		if (!spatial_fp) {
+			fprintf(stderr, "Could not open pickup.csv\n");
+			exit(1);
+		}
 	}
+
+    // Generate pickup date
+    RANDOM(tmp_date, O_ODATE_MIN, O_ODATE_MAX, O_ODATE_SD);
+    strcpy(t->pickupdate, asc_date[tmp_date - STARTDATE]);
+
+    // Generate sparse key
+    mk_sparse (index, t->tkey,
+		(upd_num == 0) ? 0 : 1 + upd_num / (10000 / refresh));
+
+    // Foreign keys
+	RANDOM(t->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD);
+	while (t->custkey % CUST_MORTALITY == 0)
+	    {
+			t->custkey += delta;
+			t->custkey = MIN(t->custkey, O_CKEY_MAX);
+			delta *= -1;
+	    }
+    RANDOM(t->driverkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+    RANDOM(t->vehiclekey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+
+    // Generate dropoff date slightly after pickup
+    // RANDOM(dropoff_offset, 1, 2, 777);
+    // strcpy(t->dropoffdate, asc_date[tmp_date + dropoff_offset - STARTDATE]);
+	strcpy(t->dropoffdate, asc_date[tmp_date - STARTDATE]);
+
+    // Monetary values
+    RANDOM(t->fare, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
+	RANDOM(t->tip, L_TAX_MIN, L_TAX_MAX, L_TAX_SD);
+    t->totalamount = t->fare + t->tip;
+
+    // Distance (e.g., in meters)
+    // RANDOM(t->distance, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
+	unsigned int seed = spider_seed_for_index(index, GLOBAL_DISTANCE_SEED);
+	srand(seed);
+	t->distance = rand_lognormal_trunc(DIST_MEAN, DIST_STDDEV, 0);
+	double angle = ((double) rand() / RAND_MAX) * 2.0 * M_PI;
+
+	// Spatial coordinates
+    // Load spatial coords from file
+    fscanf(spatial_fp, "%lf,%lf", &t->pickup_loc[0], &t->pickup_loc[1]);
+	// fscanf(spatial_fp, "%lf,%lf", &t->dropoff_loc[0], &t->dropoff_loc[1]);
+
+	double dx = t->distance * cos(angle);
+    double dy = t->distance * sin(angle);
+
+    t->dropoff_loc[0] = t->pickup_loc[0] + dx;
+    t->dropoff_loc[1] = t->pickup_loc[1] + dy;
+	// t->dropoff_loc[0] = t->pickup_loc[0] + t->distance;
+	// t->dropoff_loc[1] = t->pickup_loc[1] + t->distance;
+
+    return (0);
+}
 #else
 long
 mk_order(long index, order_t *o, long upd_num)

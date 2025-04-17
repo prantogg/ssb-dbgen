@@ -245,6 +245,28 @@ sd_part(int child, long skip_count)
 }
 
 long 
+sd_trip(int child, long skip_count)
+	{
+	int i,j;
+	
+	for (j=0; j < O_LCNT_MAX; j++)
+		{
+		for (i=L_QTY_SD; i<= L_RFLG_SD; i++)
+			ADVANCE_STREAM(i, skip_count);
+		}
+	
+	FAKE_V_STR(L_CMNT_LEN, L_CMNT_SD, skip_count);
+	/* need to special case this as the link between master and detail */
+	if (child == 1)
+		{
+		ADVANCE_STREAM(O_ODATE_SD, skip_count);
+		ADVANCE_STREAM(O_LCNT_SD, skip_count);
+		}
+		
+	return(0L);
+	}
+
+long 
 sd_line(int child, long skip_count)
 	{
 	int i,j;

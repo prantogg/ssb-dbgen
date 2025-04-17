@@ -43,18 +43,18 @@ seed_t     Seed[MAX_STREAM + 1] =
     {ORDER,  1171034773, 0, 1},					/* O_CLRK_SD    11 */
     {ORDER,  276090261,  0, RNG_PER_SENT * 8},  /* O_CMNT_SD    12 */
 	{ORDER,  1066728069, 0, 1},					/* O_ODATE_SD   13 */
-    {LINE,   209208115,  0, O_LCNT_MAX},        /* L_QTY_SD     14 */
-    {LINE,   554590007,  0, O_LCNT_MAX},        /* L_DCNT_SD    15 */
-    {LINE,   721958466,  0, O_LCNT_MAX},        /* L_TAX_SD     16 */
-    {LINE,   1371272478, 0, O_LCNT_MAX},        /* L_SHIP_SD    17 */
-    {LINE,   675466456,  0, O_LCNT_MAX},        /* L_SMODE_SD   18 */
-    {LINE,   1808217256, 0, O_LCNT_MAX},      /* L_PKEY_SD    19 */
-    {LINE,   2095021727, 0, O_LCNT_MAX},      /* L_SKEY_SD    20 */
-    {LINE,   1769349045, 0, O_LCNT_MAX},      /* L_SDTE_SD    21 */
-    {LINE,   904914315,  0, O_LCNT_MAX},      /* L_CDTE_SD    22 */
-    {LINE,   373135028,  0, O_LCNT_MAX},      /* L_RDTE_SD    23 */
-    {LINE,   717419739,  0, O_LCNT_MAX},      /* L_RFLG_SD    24 */
-    {LINE,   1095462486, 0, O_LCNT_MAX * RNG_PER_SENT * 5},   /* L_CMNT_SD    25 */
+    {TRIP,   209208115,  0, O_LCNT_MAX},        /* L_QTY_SD     14 */
+    {TRIP,   554590007,  0, O_LCNT_MAX},        /* L_DCNT_SD    15 */
+    {TRIP,   721958466,  0, O_LCNT_MAX},        /* L_TAX_SD     16 */
+    {TRIP,   1371272478, 0, O_LCNT_MAX},        /* L_SHIP_SD    17 */
+    {TRIP,   675466456,  0, O_LCNT_MAX},        /* L_SMODE_SD   18 */
+    {TRIP,   1808217256, 0, O_LCNT_MAX},      /* L_PKEY_SD    19 */
+    {TRIP,   2095021727, 0, O_LCNT_MAX},      /* L_SKEY_SD    20 */
+    {TRIP,   1769349045, 0, O_LCNT_MAX},      /* L_SDTE_SD    21 */
+    {TRIP,   904914315,  0, O_LCNT_MAX},      /* L_CDTE_SD    22 */
+    {TRIP,   373135028,  0, O_LCNT_MAX},      /* L_RDTE_SD    23 */
+    {TRIP,   717419739,  0, O_LCNT_MAX},      /* L_RFLG_SD    24 */
+    {TRIP,   1095462486, 0, O_LCNT_MAX * RNG_PER_SENT * 5},   /* L_CMNT_SD    25 */
     {CUST,   881155353,  0, 9},      /* C_ADDR_SD    26 */
     {CUST,   1489529863, 0, 1},      /* C_NTRG_SD    27 */
     {CUST,   1521138112, 0, 3},      /* C_PHNE_SD    28 */
@@ -68,7 +68,7 @@ seed_t     Seed[MAX_STREAM + 1] =
     {DRIV,   1341315363, 0, RNG_PER_SENT * 11},     /* S_CMNT_SD    36 */
     {PART,   709314158,  0, 92},      /* P_NAME_SD    37 */
     {ORDER,  591449447,  0, 1},      /* O_PRIO_SD    38 */
-    {LINE,   431918286,  0, 1},      /* HVAR_SD      39 */
+    {TRIP,   431918286,  0, 1},      /* HVAR_SD      39 */
     {ORDER,  851767375,  0, 1},      /* O_CKEY_SD    40 */
     {NATION, 606179079,  0, RNG_PER_SENT * 16},      /* N_CMNT_SD    41 */
     {REGION, 1500869201, 0, RNG_PER_SENT * 16},      /* R_CMNT_SD    42 */

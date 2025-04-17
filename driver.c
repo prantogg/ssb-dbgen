@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include <stdlib.h>
+#include "spider.h"
 #if (defined(_POSIX_)||!defined(WIN32))		/* Change for Windows NT */
 #ifndef DOS
 #include <unistd.h>
@@ -111,6 +112,7 @@ int pr_cust (customer_t * c, int mode);
 int pr_part (part_t * p, int mode);
 int pr_driver (driver_t * d, int mode);
 int pr_line (order_t * o, int mode);
+int pr_trip (trip_t * t, int mode);
 #else
 int pr_cust (customer_t * c, int mode);
 int pr_line (order_t * o, int mode);
@@ -135,6 +137,7 @@ int ld_driv (driver_t * d, int mode);
 /*todo: get rid of ld_order*/
 int ld_line (order_t * o, int mode);
 int ld_order (order_t * o, int mode);
+int ld_trip (trip_t * t, int mode);
 
 #else
 int ld_cust (customer_t * c, int mode);
@@ -159,6 +162,7 @@ long sd_driv (int child, long skip_count);
 
 long sd_line (int child, long skip_count);
 long sd_order (int child, long skip_count);
+long sd_trip (int child, long skip_count);
 
 #else
 long sd_cust (int child, long skip_count);
@@ -179,6 +183,7 @@ int hd_cust (FILE * f);
 int hd_part (FILE * f);
 int hd_supp (FILE * f);
 int hd_line (FILE * f);
+int hd_trip (FILE * f);
 
 #else
 int hd_cust (FILE * f);
@@ -202,6 +207,7 @@ int vrf_part (part_t * p, int mode);
 int vrf_driv (driver_t * d, int mode);
 int vrf_line (order_t * o, int mode);
 int vrf_order (order_t * o, int mode);
+int vrf_trip (trip_t * t, int mode);
 int vrf_date (date_t,int mode);
 #else
 int vrf_cust (customer_t * c, int mode);
@@ -232,8 +238,8 @@ tdef tdefs[] =
 	{"date.tbl","date table",2556,0,{pr_date,ld_date}, 0,vrf_date, NONE,0},
 	/*line order is SF*1,500,000, however due to the implementation
 	  the base here is 150,000 instead if 1500,000*/
-	{"lineorder.tbl", "lineorder table", 150000, hd_line,
-		{pr_line, ld_line}, sd_line, vrf_line, NONE, 0},
+	{"trip.tbl", "trip table", 150000, hd_trip,
+		{pr_trip, ld_trip}, sd_trip, vrf_trip, NONE, 0},
 	{0,0,0,0,{0,0}, 0,0,0,0},
 	{0,0,0,0,{0,0}, 0,0,0,0},
 	{0,0,0,0,{0,0}, 0,0,0,0},
@@ -375,7 +381,7 @@ load_dists (void)
 void
 gen_tbl (int tnum, long start, long count, long upd_num)
 {
-	static order_t o;
+	static trip_t t;
 	driver_t driv;
 	customer_t cust;
 	part_t part;
@@ -400,13 +406,13 @@ gen_tbl (int tnum, long start, long count, long upd_num)
 
 	if (init == 0)
 	{
-		INIT_HUGE(o.okey);
+		INIT_HUGE(t.tkey);
 		for (i=0; i < O_LCNT_MAX; i++)
-#ifdef SSBM
-			INIT_HUGE(o.lineorders[i].okey);	
-#else
-			INIT_HUGE(o.l[i].okey);
-#endif
+// #ifdef SSBM
+// 			INIT_HUGE(o.lineorders[i].okey);	
+// #else
+// 			INIT_HUGE(o.l[i].okey);
+// #endif
 		init = 1;
 	}
 
@@ -417,38 +423,34 @@ gen_tbl (int tnum, long start, long count, long upd_num)
 
 		switch (tnum)
 		{
-		case LINE:
-#ifdef SSBM
-#else
-		case ORDER:
-  		case ORDER_LINE: 
-#endif
-			mk_order (i, &o, upd_num % 10000);
+		case TRIP:
+			
+			mk_trip (i, &t, upd_num % 10000);
 
-		  if (insert_segments  && (upd_num > 0))
-			if((upd_num / 10000) < residual_rows)
-				{
-				if((++rows_this_segment) > rows_per_segment) 
-					{						
-					rows_this_segment=0;
-					upd_num += 10000;					
-					}
-				}
-			else
-				{
-				if((++rows_this_segment) >= rows_per_segment) 
+			if (insert_segments  && (upd_num > 0))
+				if((upd_num / 10000) < residual_rows)
 					{
-					rows_this_segment=0;
-					upd_num += 10000;
+					if((++rows_this_segment) > rows_per_segment) 
+						{						
+						rows_this_segment=0;
+						upd_num += 10000;					
+						}
 					}
-				}
-
-			if (set_seeds == 0)
-				if (validate)
-					tdefs[tnum].verify(&o, 0);
 				else
-					tdefs[tnum].loader[direct] (&o, upd_num);
-			break;
+					{
+					if((++rows_this_segment) >= rows_per_segment) 
+						{
+						rows_this_segment=0;
+						upd_num += 10000;
+						}
+					}
+
+				if (set_seeds == 0)
+					if (validate)
+						tdefs[tnum].verify(&t, 0);
+					else
+						tdefs[tnum].loader[direct] (&t, upd_num);
+				break;
 		case DRIV:
 			mk_driver (i, &driv);
 			if (set_seeds == 0)
@@ -565,7 +567,7 @@ usage (void)
 	fprintf (stderr, "-T p   -- generate parts dimension table ONLY\n");
 	fprintf (stderr, "-T s   -- generate suppliers dimension table ONLY\n");
 	fprintf (stderr, "-T d   -- generate date dimension table ONLY\n");
-	fprintf (stderr, "-T l   -- generate lineorder fact table ONLY\n");
+	fprintf (stderr, "-T t   -- generate Trip fact table ONLY\n");
 #else
 	fprintf (stderr, "-T c   -- generate cutomers ONLY\n");
 	fprintf (stderr, "-T l   -- generate nation/region ONLY\n");
@@ -740,15 +742,15 @@ process_options (int count, char **vector)
 		  case 'd':			/* generate date ONLY */
 			  table = 1 << DATE;
 			  break;  
-		  case 'l':			/* generate lineorder table ONLY */
-			  table = 1 << LINE;
+		  case 't':			/* generate trip table ONLY */
+			  table = 1 << TRIP;
 			  break;
 		  case 'a':
 		          table = 1 << CUST;
 			  table |= 1 << PART;
 			  table |= 1 << DRIV;
 			  table |= 1 << DATE;
-			  table |= 1 << LINE;
+			  table |= 1 << TRIP;
 			  break;
 #else
 		  case 'c':			/* generate customer ONLY */
@@ -938,7 +940,7 @@ main (int ac, char **av)
 	refresh = UPD_PCT;
 	step = -1;
 #ifdef SSBM
-	tdefs[LINE].base *=
+	tdefs[TRIP].base *=
 		ORDERS_PER_CUST;			/* have to do this after init */
 #else
 	tdefs[ORDER].base *=
@@ -993,8 +995,8 @@ main (int ac, char **av)
 		double fix1;
 
 #ifdef SSBM
-		set_state (LINE, scale, 1, 2, (long *)&i); 
-		fix1 = (double)tdefs[LINE].base / (double)10000; /*represent the %% percentage (n/100)%*/
+		set_state (TRIP, scale, 1, 2, (long *)&i); 
+		fix1 = (double)tdefs[TRIP].base / (double)10000; /*represent the %% percentage (n/100)%*/
 #else
 		set_state (ORDER, scale, 1, 2, (long *)&i); 
 		fix1 = (double)tdefs[ORDER_LINE].base / (double)10000;
@@ -1018,7 +1020,7 @@ main (int ac, char **av)
 #ifdef SSBM
 				fprintf (stderr,
 				"Generating update pair #%d for %s [pid: %d]",
-				upd_num + 1, tdefs[LINE].comment, DSS_PROC);
+				upd_num + 1, tdefs[TRIP].comment, DSS_PROC);
 #else
 				fprintf (stderr,
 				"Generating update pair #%d for %s [pid: %d]",
@@ -1030,14 +1032,14 @@ main (int ac, char **av)
 			delete_segment=0;
 			minrow = upd_num * rowcnt + 1;
 #ifdef SSBM
-			gen_tbl (LINE, minrow, rowcnt, upd_num + 1);
+			gen_tbl (TRIP, minrow, rowcnt, upd_num + 1);
 #else
 			gen_tbl (ORDER_LINE, minrow, rowcnt, upd_num + 1);
 #endif
 			if (verbose > 0)
 				fprintf (stderr, "done.\n");
 #ifdef SSBM
-			pr_drange (LINE, minrow, rowcnt, upd_num + 1);
+			pr_drange (TRIP, minrow, rowcnt, upd_num + 1);
 #else
 			pr_drange (ORDER_LINE, minrow, rowcnt, upd_num + 1);
 #endif
@@ -1118,6 +1120,12 @@ main (int ac, char **av)
 					if (verbose > 0)
 						fprintf (stderr, "%s data for %s [pid: %ld]",
 						(validate)?"Validating":"Generating", tdefs[i].comment, DSS_PROC);
+					int card = tdefs[TRIP].base * scale; // pickup
+					double affine[6] = {
+						360.0, 0.0,     -178.66,
+						0.0,   180.0,   -106.351
+					};
+					spider_generate_normal_to_file("pickup.csv", card, 2, 42, affine, 0.5, 0.25);
 					gen_tbl (i, minrow, rowcnt, upd_num);
 					if (verbose > 0)
 						fprintf (stderr, "done.\n");

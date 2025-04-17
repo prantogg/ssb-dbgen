@@ -566,7 +566,7 @@ set_state(int table, long sf, long procs, long step, long *extra_rows)
 	result = rowcount;
 	for (i=0; i < step - 1; i++)
 		{
-		if (table == LINE)	/* special case for shared seeds */
+		if (table == TRIP)	/* special case for shared seeds */
 			tdefs[table].gen_seed(1, rowcount);
 		else
 			tdefs[table].gen_seed(0, rowcount);

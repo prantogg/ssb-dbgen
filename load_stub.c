@@ -138,6 +138,18 @@ ld_order (order_t *p, int mode)
     return(0);
 }
 
+int ld_trip (trip_t *t, int mode)
+{
+    static int count = 0;
+
+    if (! count++)
+        printf("%s %s\n",
+            "No load routine has been defined",
+            "for the trip table");
+
+    return(0);
+}
+
 int ld_line (order_t *p, int mode)
 {
     static int count = 0;
@@ -149,8 +161,6 @@ int ld_line (order_t *p, int mode)
 
     return(0);
 }
-
-
 
 int 
 hd_psupp (FILE *f)
@@ -165,6 +175,17 @@ hd_psupp (FILE *f)
     return(0);
 }
 
+
+int 
+hd_trip (FILE *f)
+{
+    static int count = 0;
+
+    if (! count++)
+        printf("No header has been defined for the trip table\n");
+
+    return(0);
+}
 
 int 
 hd_line (FILE *f)

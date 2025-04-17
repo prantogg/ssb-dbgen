@@ -139,6 +139,9 @@ dbg_print(int format, FILE *target, void *data, int len, int sep)
 		else
 			fprintf(target, "%c", (char)data);
 		break;
+    case DT_DBL:
+        fprintf(target, "%lf", *((double *)data));
+        break;
 	}
 
 #ifdef EOL_HANDLING
@@ -236,98 +239,141 @@ pr_order(order_t *o, int mode)
 }
 #endif
 
+#ifdef SSBM
+int
+pr_trip(trip_t *t, int mode)
+{
+    static FILE *fp_t = NULL;
+    static int last_mode = 0;
+
+    if (fp_t == NULL || mode != last_mode)
+    {
+        if (fp_t)
+            fclose(fp_t);
+        fp_t = print_prep(TRIP, mode);
+
+        // 🛡️ Add the safety check here
+        if (!fp_t) {
+            fprintf(stderr, "Failed to open output file for trip\n");
+            exit(1);
+        }
+
+        last_mode = mode;
+    }
+
+    PR_STRT(fp_t);
+    PR_HUGE(fp_t, t->tkey);
+    PR_INT(fp_t, t->custkey);
+    PR_INT(fp_t, t->driverkey);
+    PR_INT(fp_t, t->vehiclekey);
+    PR_STR(fp_t, t->pickupdate, DATE_LEN);
+    PR_STR(fp_t, t->dropoffdate, DATE_LEN);
+    PR_INT(fp_t, t->fare);
+    PR_INT(fp_t, t->tip);
+    PR_INT(fp_t, t->totalamount);
+    PR_DBL(fp_t, t->distance);
+    PR_DBL(fp_t, t->pickup_loc[0]);
+    PR_DBL(fp_t, t->pickup_loc[1]);
+    PR_DBL(fp_t, t->dropoff_loc[0]);
+    PR_DBL(fp_t, t->dropoff_loc[1]);
+    PR_END(fp_t);
+
+    return(0);
+}
+#endif
+
 /*
  * print an order's lineitems
  */
-#ifdef SSBM
-int
-pr_line(order_t *o, int mode)
-{
+// #ifdef SSBM
+// int
+// pr_line(order_t *o, int mode)
+// {
 
-    static FILE *fp_l = NULL;
-    static int last_mode = 0;
-    long      i;
-    int days;
-    char buf[100];
+//     static FILE *fp_l = NULL;
+//     static int last_mode = 0;
+//     long      i;
+//     int days;
+//     char buf[100];
 
-    if (fp_l == NULL || mode != last_mode)
-        {
-        if (fp_l) 
-            fclose(fp_l);
-        fp_l = print_prep(LINE, mode);
-        last_mode = mode;
-        }
+//     if (fp_l == NULL || mode != last_mode)
+//         {
+//         if (fp_l) 
+//             fclose(fp_l);
+//         fp_l = print_prep(LINE, mode);
+//         last_mode = mode;
+//         }
 
-    for (i = 0; i < o->lines; i++)
-        {
-        PR_STRT(fp_l);
-        PR_HUGE(fp_l, o->lineorders[i].okey);
-        PR_INT(fp_l, o->lineorders[i].linenumber);
-	PR_INT(fp_l, o->lineorders[i].custkey);
-	PR_INT(fp_l, o->lineorders[i].partkey);
-        PR_INT(fp_l, o->lineorders[i].drivkey);
-        PR_STR(fp_l, o->lineorders[i].orderdate, DATE_LEN);
-	PR_STR(fp_l, o->lineorders[i].opriority, O_OPRIO_LEN);
-	PR_INT(fp_l, o->lineorders[i].ship_priority);
-        PR_INT(fp_l, o->lineorders[i].quantity);
-        PR_INT(fp_l, o->lineorders[i].extended_price);
-        PR_INT(fp_l, o->lineorders[i].order_totalprice);
-        PR_INT(fp_l, o->lineorders[i].discount);
-        PR_INT(fp_l, o->lineorders[i].revenue);
-	PR_INT(fp_l, o->lineorders[i].supp_cost);
-	PR_INT(fp_l, o->lineorders[i].tax);
-	PR_STR(fp_l, o->lineorders[i].commit_date, DATE_LEN);
-	PR_STR(fp_l, o->lineorders[i].shipmode, O_SHIP_MODE_LEN);
-        PR_END(fp_l);
-        }
+//     for (i = 0; i < o->lines; i++)
+//         {
+//         PR_STRT(fp_l);
+//         PR_HUGE(fp_l, o->lineorders[i].okey);
+//         PR_INT(fp_l, o->lineorders[i].linenumber);
+// 	PR_INT(fp_l, o->lineorders[i].custkey);
+// 	PR_INT(fp_l, o->lineorders[i].partkey);
+//         PR_INT(fp_l, o->lineorders[i].drivkey);
+//         PR_STR(fp_l, o->lineorders[i].orderdate, DATE_LEN);
+// 	PR_STR(fp_l, o->lineorders[i].opriority, O_OPRIO_LEN);
+// 	PR_INT(fp_l, o->lineorders[i].ship_priority);
+//         PR_INT(fp_l, o->lineorders[i].quantity);
+//         PR_INT(fp_l, o->lineorders[i].extended_price);
+//         PR_INT(fp_l, o->lineorders[i].order_totalprice);
+//         PR_INT(fp_l, o->lineorders[i].discount);
+//         PR_INT(fp_l, o->lineorders[i].revenue);
+// 	PR_INT(fp_l, o->lineorders[i].supp_cost);
+// 	PR_INT(fp_l, o->lineorders[i].tax);
+// 	PR_STR(fp_l, o->lineorders[i].commit_date, DATE_LEN);
+// 	PR_STR(fp_l, o->lineorders[i].shipmode, O_SHIP_MODE_LEN);
+//         PR_END(fp_l);
+//         }
 
-   return(0);
-}
-#else
-int
-pr_line(order_t *o, int mode)
-{
-    static FILE *fp_l = NULL;
-    static int last_mode = 0;
-    long      i;
-    int days;
-    char buf[100];
+//    return(0);
+// }
+// #else
+// int
+// pr_line(order_t *o, int mode)
+// {
+//     static FILE *fp_l = NULL;
+//     static int last_mode = 0;
+//     long      i;
+//     int days;
+//     char buf[100];
 
-    if (fp_l == NULL || mode != last_mode)
-        {
-        if (fp_l) 
-            fclose(fp_l);
-        fp_l = print_prep(LINE, mode);
-        last_mode = mode;
-        }
+//     if (fp_l == NULL || mode != last_mode)
+//         {
+//         if (fp_l) 
+//             fclose(fp_l);
+//         fp_l = print_prep(LINE, mode);
+//         last_mode = mode;
+//         }
 
-    for (i = 0; i < o->lines; i++)
-        {
-        PR_STRT(fp_l);
-        PR_HUGE(fp_l, o->l[i].okey);
-        PR_INT(fp_l, o->l[i].partkey);
-        PR_INT(fp_l, o->l[i].drivkey);
-        PR_INT(fp_l, o->l[i].lcnt);
-        PR_INT(fp_l, o->l[i].quantity);
-        PR_MONEY(fp_l, o->l[i].eprice);
-        PR_MONEY(fp_l, o->l[i].discount);
-        PR_MONEY(fp_l, o->l[i].tax);
-        PR_CHR(fp_l, o->l[i].rflag[0]);
-        PR_CHR(fp_l, o->l[i].lstatus[0]);
-        PR_STR(fp_l, o->l[i].sdate, DATE_LEN);
-        PR_STR(fp_l, o->l[i].cdate, DATE_LEN);
-        PR_STR(fp_l, o->l[i].rdate, DATE_LEN);
-        PR_STR(fp_l, o->l[i].shipinstruct, L_INST_LEN);
-        PR_STR(fp_l, o->l[i].shipmode, L_SMODE_LEN);
-        PR_VSTR_LAST(fp_l, o->l[i].comment, 
-            (columnar)?(long)(ceil(L_CMNT_LEN *
-        V_STR_HGH)):o->l[i].clen);
-        PR_END(fp_l);
-        }
+//     for (i = 0; i < o->lines; i++)
+//         {
+//         PR_STRT(fp_l);
+//         PR_HUGE(fp_l, o->l[i].okey);
+//         PR_INT(fp_l, o->l[i].partkey);
+//         PR_INT(fp_l, o->l[i].drivkey);
+//         PR_INT(fp_l, o->l[i].lcnt);
+//         PR_INT(fp_l, o->l[i].quantity);
+//         PR_MONEY(fp_l, o->l[i].eprice);
+//         PR_MONEY(fp_l, o->l[i].discount);
+//         PR_MONEY(fp_l, o->l[i].tax);
+//         PR_CHR(fp_l, o->l[i].rflag[0]);
+//         PR_CHR(fp_l, o->l[i].lstatus[0]);
+//         PR_STR(fp_l, o->l[i].sdate, DATE_LEN);
+//         PR_STR(fp_l, o->l[i].cdate, DATE_LEN);
+//         PR_STR(fp_l, o->l[i].rdate, DATE_LEN);
+//         PR_STR(fp_l, o->l[i].shipinstruct, L_INST_LEN);
+//         PR_STR(fp_l, o->l[i].shipmode, L_SMODE_LEN);
+//         PR_VSTR_LAST(fp_l, o->l[i].comment, 
+//             (columnar)?(long)(ceil(L_CMNT_LEN *
+//         V_STR_HGH)):o->l[i].clen);
+//         PR_END(fp_l);
+//         }
 
-   return(0);
-}
-#endif
+//    return(0);
+// }
+// #endif
 
 /*
  * print the numbered order *and* its associated lineitems
@@ -583,10 +629,10 @@ pr_drange(int tbl, long min, long cnt, long num)
 	    {
 	    fprintf(dfp, 
 		"delete from %s where %s between %ld and %ld;\n",
-		    tdefs[ORDER].name, "o_orderkey", start, last);
+		    tdefs[TRIP].name, "tripkey", start, last);
 	    fprintf(dfp, 
 		"delete from %s where %s between %ld and %ld;\n",
-		    tdefs[LINE].name, "l_orderkey", start, last);
+		    tdefs[TRIP].name, "tripkey", start, last);
 	    fprintf(dfp, "commit work;\n");
 	    }
 	else 
@@ -747,72 +793,97 @@ vrf_order(order_t *o, int mode)
 }
 #endif
 
-/*
- * print an order's lineitems
- */
 #ifdef SSBM
 int
-vrf_line(order_t *o, int mode)
+vrf_trip(trip_t *t, int mode)
 {
-    int i;
-
-    for (i = 0; i < o->lines; i++)
-        {
-	    VRF_STRT(LINE);
-	    VRF_HUGE(LINE, o->lineorders[i].okey);
-	    VRF_INT(LINE, o->lineorders[i].linenumber);
-	    VRF_INT(LINE, o->lineorders[i].custkey);
-	    VRF_INT(LINE, o->lineorders[i].partkey);
-	    VRF_INT(LINE, o->lineorders[i].drivkey);
-	    VRF_STR(LINE, o->lineorders[i].orderdate);
-	    VRF_STR(LINE, o->lineorders[i].opriority);
-	    VRF_INT(LINE, o->lineorders[i].ship_priority);
-	    VRF_INT(LINE, o->lineorders[i].quantity);
-	    VRF_INT(LINE, o->lineorders[i].extended_price);
-	    VRF_INT(LINE, o->lineorders[i].order_totalprice);
-	    VRF_INT(LINE, o->lineorders[i].discount);
-	    VRF_INT(LINE, o->lineorders[i].revenue);
-	    VRF_INT(LINE, o->lineorders[i].supp_cost);
-	    VRF_INT(LINE, o->lineorders[i].tax);
-	    VRF_STR(LINE, o->lineorders[i].commit_date);
-	    VRF_STR(LINE, o->lineorders[i].shipmode);
-	    VRF_END(LINE);
-        }
+    VRF_STRT(TRIP);
+    VRF_HUGE(TRIP, t->tkey);
+    VRF_INT(TRIP, t->custkey);
+    VRF_INT(TRIP, t->driverkey);
+    VRF_INT(TRIP, t->vehiclekey);
+    VRF_STR(TRIP, t->pickupdate);
+    VRF_STR(TRIP, t->dropoffdate);
+    VRF_INT(TRIP, t->fare);
+    VRF_INT(TRIP, t->tip);
+    VRF_INT(TRIP, t->totalamount);
+    VRF_DBL(TRIP, t->distance);
+    VRF_DBL(TRIP, t->pickup_loc[0]);
+    VRF_DBL(TRIP, t->pickup_loc[1]);
+    VRF_DBL(TRIP, t->dropoff_loc[0]);
+    VRF_DBL(TRIP, t->dropoff_loc[1]);
+    VRF_END(TRIP);
 
     return(0);
 }
-
-#else
-int
-vrf_line(order_t *o, int mode)
-{
-	int i;
-
-    for (i = 0; i < o->lines; i++)
-        {
-        VRF_STRT(LINE);
-        VRF_HUGE(LINE, o->l[i].okey);
-        VRF_INT(LINE, o->l[i].partkey);
-        VRF_INT(LINE, o->l[i].drivkey);
-        VRF_INT(LINE, o->l[i].lcnt);
-        VRF_INT(LINE, o->l[i].quantity);
-        VRF_MONEY(LINE, o->l[i].eprice);
-        VRF_MONEY(LINE, o->l[i].discount);
-        VRF_MONEY(LINE, o->l[i].tax);
-        VRF_CHR(LINE, o->l[i].rflag[0]);
-        VRF_CHR(LINE, o->l[i].lstatus[0]);
-        VRF_STR(LINE, o->l[i].sdate);
-        VRF_STR(LINE, o->l[i].cdate);
-        VRF_STR(LINE, o->l[i].rdate);
-        VRF_STR(LINE, o->l[i].shipinstruct);
-        VRF_STR(LINE, o->l[i].shipmode);
-        VRF_STR(LINE, o->l[i].comment);
-        VRF_END(LINE);
-        }
-
-   return(0);
-}
 #endif
+
+/*
+ * print an order's lineitems
+ */
+// #ifdef SSBM
+// int
+// vrf_line(order_t *o, int mode)
+// {
+//     int i;
+
+//     for (i = 0; i < o->lines; i++)
+//         {
+// 	    VRF_STRT(LINE);
+// 	    VRF_HUGE(LINE, o->lineorders[i].okey);
+// 	    VRF_INT(LINE, o->lineorders[i].linenumber);
+// 	    VRF_INT(LINE, o->lineorders[i].custkey);
+// 	    VRF_INT(LINE, o->lineorders[i].partkey);
+// 	    VRF_INT(LINE, o->lineorders[i].drivkey);
+// 	    VRF_STR(LINE, o->lineorders[i].orderdate);
+// 	    VRF_STR(LINE, o->lineorders[i].opriority);
+// 	    VRF_INT(LINE, o->lineorders[i].ship_priority);
+// 	    VRF_INT(LINE, o->lineorders[i].quantity);
+// 	    VRF_INT(LINE, o->lineorders[i].extended_price);
+// 	    VRF_INT(LINE, o->lineorders[i].order_totalprice);
+// 	    VRF_INT(LINE, o->lineorders[i].discount);
+// 	    VRF_INT(LINE, o->lineorders[i].revenue);
+// 	    VRF_INT(LINE, o->lineorders[i].supp_cost);
+// 	    VRF_INT(LINE, o->lineorders[i].tax);
+// 	    VRF_STR(LINE, o->lineorders[i].commit_date);
+// 	    VRF_STR(LINE, o->lineorders[i].shipmode);
+// 	    VRF_END(LINE);
+//         }
+
+//     return(0);
+// }
+
+// #else
+// int
+// vrf_line(order_t *o, int mode)
+// {
+// 	int i;
+
+//     for (i = 0; i < o->lines; i++)
+//         {
+//         VRF_STRT(LINE);
+//         VRF_HUGE(LINE, o->l[i].okey);
+//         VRF_INT(LINE, o->l[i].partkey);
+//         VRF_INT(LINE, o->l[i].drivkey);
+//         VRF_INT(LINE, o->l[i].lcnt);
+//         VRF_INT(LINE, o->l[i].quantity);
+//         VRF_MONEY(LINE, o->l[i].eprice);
+//         VRF_MONEY(LINE, o->l[i].discount);
+//         VRF_MONEY(LINE, o->l[i].tax);
+//         VRF_CHR(LINE, o->l[i].rflag[0]);
+//         VRF_CHR(LINE, o->l[i].lstatus[0]);
+//         VRF_STR(LINE, o->l[i].sdate);
+//         VRF_STR(LINE, o->l[i].cdate);
+//         VRF_STR(LINE, o->l[i].rdate);
+//         VRF_STR(LINE, o->l[i].shipinstruct);
+//         VRF_STR(LINE, o->l[i].shipmode);
+//         VRF_STR(LINE, o->l[i].comment);
+//         VRF_END(LINE);
+//         }
+
+//    return(0);
+// }
+// #endif
 
 /*
  * print the numbered order *and* its associated lineitems
